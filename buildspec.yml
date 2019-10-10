@@ -1,0 +1,42 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      java: corretto8
+  build:
+    commands:
+      - echo Cleaning my Springboot application now.....
+      - mvn clean  
+      - echo Build my java app
+      - mvn package
+      - echo Java Build is ready
+  post_build:
+    commands:
+      - echo Logging into AWS ECR
+      - aws --version 
+      - $(aws ecr get-login --region $AWS_DEFAULT_REGION --no-includ-email) 
+      - REPOSITORY_URI=438870507947.dkr.ecr.us-east-1.amazonaws.com/amitecrregistry
+      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+      - IMAGE_TAG=build-$(echo $CODEBUILD_BUILD_ID | awk -F":" '{print $2}")
+      - docker build -t $REPOSITORY_URI:latest .
+      - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
+      - echo build completed
+      - echo pushing the docker image to ECR
+      - docker push $REPOSITORY_URI:latest
+      - docker push $REPOSITORY_URI:$IMAGE_TAG
+      - echo docker image pushed to ECR. Go check now
+      - printf '[{"name":"HelloWorld","imageUri" : "%s"}]' $REPOSITORY_URI:$IMAGE_TAG > imagedefinations.json
+      - cat imagedefinations.json
+artifacts:
+  files: imagedefinations.json
+  discard-paths: yes
+
+
+
+
+
+
+
+
+  
