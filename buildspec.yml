@@ -7,7 +7,9 @@ phases:
   build:
     commands:
       - echo Cleaning my Springboot application now.....
-      - mvn clean  
+      - mvn clean
+      - echo testing123
+      - echo testing345  
       - echo Build my java app
       - mvn package
       - echo Java Build is ready
@@ -25,7 +27,6 @@ phases:
       - echo pushing the docker image to ECR
       - docker push $REPOSITORY_URI:latest
       - docker push $REPOSITORY_URI:$IMAGE_TAG
-      - echo docker image pushed to ECR
       - printf '[{"name":"HelloWorld","imageUri" : "%s"}]' $REPOSITORY_URI:$IMAGE_TAG > imagedefinations.json
       - cat imagedefinations.json
 artifacts:
